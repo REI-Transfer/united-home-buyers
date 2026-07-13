@@ -3,6 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- GoFunnel tracking + lead mirror -->
+    <script src="https://app.gofunnel.ai/api/tracking/script/47bae35c-5bf6-4770-a694-e521677e7501"></script>
+    <script>
+    (function () {
+      if (window.__gfInit) return;
+      window.__gfInit = true;
+      var CRED = "50733e8f-563b-4e71-9d44-bee229e37d31";
+      var SECRET = "055f5e04-98f4-4211-b12c-629e1090a3a2";
+      var FORM_ID = "united-home-buyers-survey";
+      var FORM_TITLE = "United Home Buyers Survey";
+      // Lead-webhook hosts these advertorials POST to (incl. unfilled placeholders).
+      var LEAD = /n8n\.|hooks\.zapier\.com|leadconnectorhq\.com|WEBHOOK_URL|_WEBHOOK/i;
+      var _fetch = window.fetch ? window.fetch.bind(window) : null;
+      if (!_fetch) return;
+      window.fetch = function (input, opts) {
+        try {
+          var url = typeof input === 'string' ? input : (input && input.url) || '';
+          var method = (opts && opts.method) || (input && input.method) || 'GET';
+          var body = opts && opts.body;
+          if (/post/i.test(method) && LEAD.test(url) && url.indexOf('gofunnel') < 0 && typeof body === 'string') {
+            gfMirror(body);
+          }
+        } catch (e) {}
+        return _fetch(input, opts);
+      };
+      function gfMirror(bodyStr) {
+        if (window.__gfMirrored) return;
+        var d;
+        try { d = JSON.parse(bodyStr); } catch (e) { return; }
+        if (!d || (!d.email && !d.phone)) return; // only a real lead
+        window.__gfMirrored = true;
+        var ck = (document.cookie.match(/(?:^|; )gf_sid=([^;]*)/) || [])[1];
+        var sid = ck ? decodeURIComponent(ck) : '';
+        var nm = ((d.name || '') + '').trim().split(/\s+/).filter(Boolean);
+        var payload = {
+          type: 'survey_submitted',
+          email: d.email || '',
+          phone: d.phone || '',
+          firstName: d.firstName || nm[0] || '',
+          lastName: d.lastName || (nm.length > 1 ? nm.slice(1).join(' ') : ''),
+          sid: d.gf_sid || sid || '',
+          formId: FORM_ID,
+          formTitle: FORM_TITLE,
+          idempotencyKey: d.meta_event_id || d.event_id || undefined,
+          leadQuestions: {
+            property_type: d.propertyType || d.property_type || '',
+            condition: d.condition || '',
+            timeline: d.timeline || '',
+            reason: d.reason || d.motivation || '',
+            listed_on_market: d.listed || d.listedOnMarket || '',
+            asking_price: d.askingPrice || d.asking_price || '',
+          },
+          data: {
+            qualified: d.qualified,
+            lead_score: d.lead_score,
+            lead_quality: d.lead_quality,
+            meta_event_id: d.meta_event_id,
+            meta_event_name: d.meta_event_name,
+            meta_value: d.meta_value,
+            address: d.address || '',
+            source: d.source || '',
+            utm_source: d.utm_source || '',
+            utm_medium: d.utm_medium || '',
+            utm_campaign: d.utm_campaign || '',
+            utm_content: d.utm_content || '',
+            utm_term: d.utm_term || '',
+            fbclid: d.fbclid || '',
+            landing_page: d.landing_url || d.landing_page || '',
+            referrer: d.referrer || '',
+            ip_address: d.ip_address || '',
+          },
+        };
+        if (!CRED || !SECRET) return;
+        _fetch('https://app.gofunnel.ai/api/v2/webhooks/external?credential_id=' + CRED, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + SECRET },
+          body: JSON.stringify(payload),
+          keepalive: true,
+        }).catch(function () {});
+      }
+    })();
+    </script>
+
     <title>United Home Buyers - Property Survey</title>
     <style>
         * {
